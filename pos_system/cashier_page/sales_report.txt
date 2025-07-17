@@ -1,0 +1,177 @@
+<?php
+session_start();
+require '../Connection_db/api.php'; // adjust path if needed
+
+// Query daily sales joined with product names, ordered by sale_date ascending
+$sql = "
+SELECT s.sale_id, p.product_name, s.quantity_sold, s.sale_date, s.price_at_sale
+FROM sales s
+JOIN products p ON s.product_id = p.id
+ORDER BY s.sale_date ASC
+";
+
+$sales = $pdo->query($sql);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Daily Sales - POS System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      display: flex;
+      background: #f9fafb;
+    }
+    nav {
+      background: #0d1117;
+      color: white;
+      padding: 12px 20px;
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      font-size: 18px;
+      box-sizing: border-box;
+    }
+    .nav-left {
+      white-space: nowrap;
+    }
+    .nav-right a {
+      color: #58a6ff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .nav-right a:hover {
+      text-decoration: underline;
+    }
+    .sidebar {
+      width: 220px;
+      background-color: #2c3e50;
+      color: white;
+      height: 100vh;
+      margin-top: 48px; /* below nav */
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 48px;
+      left: 0;
+      overflow-y: auto;
+    }
+    .sidebar h2 {
+      text-align: center;
+      padding: 20px 0;
+      margin: 0;
+      background-color: #1abc9c;
+    }
+    .sidebar a {
+      padding: 15px 20px;
+      text-decoration: none;
+      color: white;
+      border-bottom: 1px solid #34495e;
+      display: block;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background-color: #16a085;
+    }
+    .content {
+      margin-left: 220px;
+      padding: 70px 30px 30px;
+      width: calc(100% - 220px);
+      box-sizing: border-box;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+    }
+    thead {
+      background: #1e293b;
+      color: white;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      font-size: 15px;
+    }
+    tr:hover {
+      background-color: #f1f5f9;
+    }
+    tfoot td {
+      font-weight: 700;
+      background: #f9fafb;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-left">🛒 POS SYSTEM</div>
+  <div class="nav-right">
+    <a href="logout.php">Logout</a>
+  </div>
+</nav>
+
+<div class="sidebar">
+  <h2>My POS</h2>
+  <a href="dashboard.php">Dashboard</a>
+  <a href="sales.php" class="active">Sales</a>
+  <a href="products.php">Products</a>
+  <a href="inventory.php">Inventory</a>
+  <a href="logout.php">Logout</a>
+</div>
+
+<div class="content">
+  <h1>Daily Sales</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Sale ID</th>
+        <th>Product</th>
+        <th>Quantity Sold</th>
+        <th>Price at Sale</th>
+        <th>Total</th>
+        <th>Sale Date & Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php
+      $grandTotal = 0;
+      while ($row = $sales->fetch(PDO::FETCH_ASSOC)):
+        $lineTotal = $row['quantity_sold'] * $row['price_at_sale'];
+        $grandTotal += $lineTotal;
+      ?>
+      <tr>
+        <td><?= htmlspecialchars($row['sale_id']) ?></td>
+        <td><?= htmlspecialchars($row['product_name']) ?></td>
+        <td><?= htmlspecialchars($row['quantity_sold']) ?></td>
+        <td>₱<?= number_format($row['price_at_sale'], 2) ?></td>
+        <td>₱<?= number_format($lineTotal, 2) ?></td>
+        <td><?= htmlspecialchars($row['sale_date']) ?></td>
+      </tr>
+      <?php endwhile; ?>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4" style="text-align: right;">Grand Total:</td>
+        <td colspan="2">₱<?= number_format($grandTotal, 2) ?></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+</body>
+</html>

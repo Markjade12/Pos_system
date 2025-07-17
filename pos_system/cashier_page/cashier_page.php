@@ -12,12 +12,17 @@ $products = $pdo->query("SELECT id, code, product_name, category_id, supplier_id
   <meta charset="UTF-8" />
   <title>POS System</title>
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
       display: flex;
-      margin: 0;
       background: #f9fafb;
     }
+
     nav {
       background: #0d1117;
       color: white;
@@ -26,89 +31,70 @@ $products = $pdo->query("SELECT id, code, product_name, category_id, supplier_id
       position: fixed;
       top: 0;
       left: 0;
-      z-index: 10;
+      z-index: 1000;
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: 18px;
     }
-    nav a {
+
+    .nav-right a {
       color: #58a6ff;
       text-decoration: none;
+      font-weight: 500;
     }
-    .sidebar, .main {
-      padding: 90px 25px 20px;
-      height: 100vh;
-      overflow-y: auto;
+
+    .nav-right a:hover {
+      text-decoration: underline;
     }
+
     .sidebar {
-      width: 50%;
-      background: #ffffff;
-      border-right: 1px solid #ccc;
+      width: 220px;
+      background-color: #2c3e50;
+      color: white;
+      height: 100vh;
+      padding-top: 60px; /* Space for nav */
+      position: fixed;
+      top: 0;
+      left: 0;
     }
-    .main {
-      width: 50%;
-      background: #f1f5f9;
+
+    .sidebar h2 {
+      text-align: center;
+      padding: 20px 0;
+      background-color: #1abc9c;
     }
-    table {
+
+    .sidebar a {
+      display: block;
+      padding: 15px 20px;
+      text-decoration: none;
+      color: white;
+      border-bottom: 1px solid #34495e;
+    }
+
+    .sidebar a:hover {
+      background-color: #16a085;
+    }
+
+    .content-wrapper {
+      margin-left: 220px;
+      padding: 80px 20px 20px;
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
       width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-      background-color: white;
-      border-radius: 8px;
-      overflow: hidden;
     }
-    thead {
-      background: #1e293b;
-      color: white;
+
+    .content, .main {
+      flex: 1;
     }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
+
+    h2 {
+      margin-bottom: 12px;
+      color: #1e293b;
     }
-    tr:hover {
-      background-color: #e2e8f0;
-    }
-    th, td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-      font-size: 15px;
-    }
-    input[type="number"] {
-      width: 60px;
-      padding: 5px;
-      font-size: 14px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    .btn-add, .btn-confirm, .btn-cancel, .btn-qty {
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .btn-add {
-      background-color: #3b82f6;
-      color: white;
-      padding: 6px 12px;
-    }
-    .btn-qty {
-      background: #e5e7eb;
-      color: #111827;
-      padding: 4px 10px;
-      font-weight: bold;
-      border-radius: 20px;
-    }
-    .btn-confirm {
-      background-color: #10b981;
-      color: white;
-      padding: 10px 16px;
-    }
-    .btn-cancel {
-      background-color: #ef4444;
-      color: white;
-      padding: 10px 16px;
-      margin-left: 10px;
-    }
+
     input[type="search"] {
       width: 100%;
       padding: 10px;
@@ -117,30 +103,96 @@ $products = $pdo->query("SELECT id, code, product_name, category_id, supplier_id
       border-radius: 6px;
       font-size: 15px;
     }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    thead {
+      background: #1e293b;
+      color: white;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      font-size: 15px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #e2e8f0;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      padding: 5px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .btn-add, .btn-confirm, .btn-cancel {
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+
+    .btn-add {
+      background-color: #3b82f6;
+      color: white;
+      padding: 6px 12px;
+    }
+
+    .btn-confirm {
+      background-color: #10b981;
+      color: white;
+      padding: 10px 16px;
+      margin-top: 10px;
+    }
+
+    .btn-cancel {
+      background-color: #ef4444;
+      color: white;
+      padding: 10px 16px;
+      margin-left: 10px;
+    }
+
     .low-stock {
       color: white;
       background: #dc2626;
       padding: 2px 8px;
       border-radius: 4px;
-      display: inline-block;
       font-size: 13px;
     }
+
     .med-stock {
       color: white;
       background: #f59e0b;
       padding: 2px 8px;
       border-radius: 4px;
-      display: inline-block;
       font-size: 13px;
     }
+
     .high-stock {
       color: white;
       background: #22c55e;
       padding: 2px 8px;
       border-radius: 4px;
-      display: inline-block;
       font-size: 13px;
     }
+
     td button:hover {
       opacity: 0.85;
     }
@@ -148,59 +200,76 @@ $products = $pdo->query("SELECT id, code, product_name, category_id, supplier_id
 </head>
 <body>
 
-<nav>
-  <div>🛒 POS SYSTEM</div>
-  <a href="logout.php" style="color: white; text-decoration: none;">Logout</a>
-</nav>
+  <nav>
+    <div class="nav-left">🛒 POS SYSTEM</div>
+    <div class="nav-right">
+      <a href="logout.php">Logout</a>
+    </div>
+  </nav>
 
-<div class="sidebar">
-  <h2>Product List</h2>
-  <input type="search" id="searchBar" placeholder="Search Product...">
-  <table id="productTable">
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Price</th>
-        <th>Stock</th>
-        <th>Quantity</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php while ($row = $products->fetch(PDO::FETCH_ASSOC)): 
-        $stock_class = ($row['quantity'] <= 0) ? 'low-stock' : (($row['quantity'] < 20) ? 'med-stock' : 'high-stock');
-        $stock_msg = ($row['quantity'] < 20) ? "⚠ Order from Supplier" : "✅ OK";
-      ?>
-        <tr data-id="<?= $row['id'] ?>" data-name="<?= htmlspecialchars($row['product_name'], ENT_QUOTES) ?>" data-price="<?= $row['price'] ?>" data-stock="<?= $row['quantity'] ?>">
-          <td><?= htmlspecialchars($row['product_name']) ?></td>
-          <td>₱<?= number_format($row['price'], 2) ?></td>
-          <td class="<?= $stock_class ?>"><?= $row['quantity'] ?> <span style="font-size: 12px; margin-left: 5px;"><?= $stock_msg ?></span></td>
-          <td>
-            <input type="number" id="qty-<?= $row['id'] ?>" min="0" max="<?= $row['quantity'] ?>" value="0" />
-          </td>
-          <td>
-            <button class="btn-add" onclick="addItemWithQty(<?= $row['id'] ?>, '<?= htmlspecialchars($row['product_name'], ENT_QUOTES) ?>', <?= $row['price'] ?>)">Add</button>
-          </td>
-        </tr>
-      <?php endwhile; ?>
-    </tbody>
-  </table>
-</div>
+  <div class="sidebar">
+  <a href="cashier_page.php" class="active"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+    <a href="sales_report.php">Sales</a>
+  
+    <a href="#">Logout</a>
+  </div>
 
-<div class="main">
-  <h2>Receipt / Subtotal</h2>
-  <table id="cartTable">
-    <thead>
-      <tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th><th>Action</th></tr>
-    </thead>
-    <tbody></tbody>
-    <tfoot>
-      <tr><td colspan="3"><strong>Subtotal</strong></td><td colspan="2" id="subtotal">₱0.00</td></tr>
-    </tfoot>
-  </table>
-  <button class="btn-confirm" onclick="confirmSale()">Confirm Sale</button>
-  <button class="btn-cancel" onclick="clearCart()">Cancel</button>
-</div>
+  <div class="content-wrapper">
+
+    <div class="content">
+      <h2>Product List</h2>
+      <input type="search" id="searchBar" placeholder="Search Product...">
+      <table id="productTable">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Quantity</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php while ($row = $products->fetch(PDO::FETCH_ASSOC)): 
+            $stock_class = ($row['quantity'] <= 0) ? 'low-stock' : (($row['quantity'] < 20) ? 'med-stock' : 'high-stock');
+            $stock_msg = ($row['quantity'] < 20) ? "⚠ Order from Supplier" : "✅ OK";
+          ?>
+            <tr data-id="<?= $row['id'] ?>" data-name="<?= htmlspecialchars($row['product_name'], ENT_QUOTES) ?>" data-price="<?= $row['price'] ?>" data-stock="<?= $row['quantity'] ?>">
+              <td><?= htmlspecialchars($row['product_name']) ?></td>
+              <td>₱<?= number_format($row['price'], 2) ?></td>
+              <td class="<?= $stock_class ?>"><?= $row['quantity'] ?> <span style="font-size: 12px; margin-left: 5px;"><?= $stock_msg ?></span></td>
+              <td>
+                <input type="number" id="qty-<?= $row['id'] ?>" min="0" max="<?= $row['quantity'] ?>" value="0" />
+              </td>
+              <td>
+                <button class="btn-add" onclick="addItemWithQty(<?= $row['id'] ?>, '<?= htmlspecialchars($row['product_name'], ENT_QUOTES) ?>', <?= $row['price'] ?>)">Add</button>
+              </td>
+            </tr>
+          <?php endwhile; ?>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="main">
+      <h2>Receipt / Subtotal</h2>
+      <table id="cartTable">
+        <thead>
+          <tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th><th>Action</th></tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr><td colspan="3"><strong>Subtotal</strong></td><td colspan="2" id="subtotal">₱0.00</td></tr>
+        </tfoot>
+      </table>
+      <button class="btn-confirm" onclick="confirmSale()">Confirm Sale</button>
+      <button class="btn-cancel" onclick="clearCart()">Cancel</button>
+    </div>
+
+  </div>
+
+
+
+
 
 <script>
   const cart = {};
@@ -383,6 +452,8 @@ $products = $pdo->query("SELECT id, code, product_name, category_id, supplier_id
     });
   });
 </script>
+
+
 
 </body>
 </html>
